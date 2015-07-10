@@ -44,6 +44,8 @@ class RallyModule(mp_module.MPModule):
 
     def idle_task(self):
         '''called on idle'''
+        if not mp_util.has_wxpython:
+            return
         if self.module('console') is not None and not self.menu_added_console:
             self.menu_added_console = True
             self.module('console').add_menu(self.menu)

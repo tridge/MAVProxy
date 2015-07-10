@@ -110,12 +110,13 @@ class WPModule(mp_module.MPModule):
                 seq = self.wploader.count()
                 print("re-requesting WP %u" % seq)
                 self.master.waypoint_request_send(seq)
-        if self.module('console') is not None and not self.menu_added_console:
-            self.menu_added_console = True
-            self.module('console').add_menu(self.menu)
-        if self.module('map') is not None and not self.menu_added_map:
-            self.menu_added_map = True
-            self.module('map').add_menu(self.menu)
+        if mp_util.has_wxpython:
+            if self.module('console') is not None and not self.menu_added_console:
+                self.menu_added_console = True
+                self.module('console').add_menu(self.menu)
+            if self.module('map') is not None and not self.menu_added_map:
+                self.menu_added_map = True
+                self.module('map').add_menu(self.menu)
 
     def process_waypoint_request(self, m, master):
         '''process a waypoint request from the master'''
