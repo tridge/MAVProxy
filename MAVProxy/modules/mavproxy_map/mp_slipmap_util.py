@@ -197,7 +197,7 @@ class SlipPolygon(SlipObject):
             return None
         return self._bounds
 
-    def draw_line(self, img, pixmapper, pt1, pt2, colour, linewidth):
+    def draw_line(self, img, pixmapper, pt1, pt2, colour, linewidth, circles=True):
         '''draw a line on the image'''
         pix1 = pixmapper(pt1)
         pix2 = pixmapper(pt2)
@@ -209,7 +209,8 @@ class SlipPolygon(SlipObject):
             self._pix_points.append(None)
             return
         cv2.line(img, pix1, pix2, colour, linewidth)
-        cv2.circle(img, pix2, linewidth*2, colour)
+        if circles:
+            cv2.circle(img, pix2, linewidth*2, colour)
         if len(self._pix_points) == 0:
             self._pix_points.append(pix1)
         self._pix_points.append(pix2)
@@ -231,13 +232,14 @@ class SlipPolygon(SlipObject):
                 colour = self.points[i][2]
             else:
                 colour = self.colour
+            circles = True
             if len(self.points[i]) > 3:
                 timestamp = self.points[i][3]
                 if self._timestamp_range is not None:
                     if timestamp < self._timestamp_range[0] or timestamp > self._timestamp_range[1]:
-                        continue
+                        circles = False
             self.draw_line(img, pixmapper, self.points[i], self.points[i+1],
-                           colour, self.linewidth)
+                           colour, self.linewidth, circles=circles)
 
     def clicked(self, px, py):
         '''see if the polygon has been clicked on.
