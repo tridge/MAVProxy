@@ -15,6 +15,7 @@ from MAVProxy.modules.lib import (icon, mp_module, mp_settings, mp_util,
                                   multiproc, win_layout)
 from MAVProxy.modules.lib.wx_loader import wx
 
+NUMCELLS = 4
 
 
 def get_vehicle_name(vehtype):
@@ -182,6 +183,7 @@ class VehiclePanel(wx.Panel):
             self, label="Alt: {0}m    Thr: {1}%".format(0, 0))
         self.altRel = wx.StaticText(self, label="Rel Alt: {0}m".format(0))
         self.battery = wx.StaticText(self, label="Battery: {0}V".format(0))
+        self.gps = wx.StaticText(self, label="GPS: -".format(0))
         self.status = wx.StaticText(self, label="Status: N/A")
         self.prearm = wx.StaticText(self, label="Prearm: N/A")
         self.statusText = wx.TextCtrl(
@@ -257,6 +259,7 @@ class VehiclePanel(wx.Panel):
         self.sizer.Add(self.thrAlt)
         self.sizer.Add(self.altRel)
         self.sizer.Add(self.battery)
+        self.sizer.Add(self.gps)
         self.sizer.Add(self.status)
         self.sizer.Add(self.prearm)
         self.sizer.Add(self.offsets)
@@ -356,8 +359,19 @@ class VehiclePanel(wx.Panel):
 
     def updatevoltage(self, voltage):
         '''update battery voltage'''
-        self.battery.SetLabel("Battery: {0:.1f}V".format(voltage))
+        self.battery.SetLabel("Battery: {0:.1f}V/cell".format(voltage/NUMCELLS))
 
+    def updategps(self, fix_type, satellites_visible):
+        '''update GPS status'''
+        if fix_type == 6:
+            color = (0,200,0)
+        elif fix_type == 5:
+            color = (200,200,0)
+        else:
+            color = (200,0,0)
+        self.gps.SetForegroundColour(color)
+        self.gps.SetLabel("GPS: %u:%u" % (fix_type, satellites_visible))
+            
     def arm(self, event):
         '''arm/disarm the vehicle'''
         self.state.child_pipe.send(
@@ -720,6 +734,8 @@ class SwarmFrame(wx.Frame):
                         widget.updateStatus("Terminated")
                 elif mtype == 'VFR_HUD':
                     widget.updatethralt(msg.throttle, msg.alt)
+                elif mtype == 'GPS_RAW_INT':
+                    widget.updategps(msg.fix_type, msg.satellites_visible)
                 elif mtype == 'GLOBAL_POSITION_INT':
                     widget.updaterelalt(msg.relative_alt * 1.0e-3)
                 elif mtype == "SYS_STATUS":
@@ -956,7 +972,7 @@ class swarm(mp_module.MPModule):
                         break
 
             # pass to gui elements. Only send relevant packets, otherwise will slow the GUI
-            if mtype in ['HEARTBEAT', 'VFR_HUD', 'GLOBAL_POSITION_INT', "SYS_STATUS", "STATUSTEXT", 'PARAM_VALUE']:
+            if mtype in ['HEARTBEAT', 'VFR_HUD', 'GLOBAL_POSITION_INT', "SYS_STATUS", "STATUSTEXT", 'PARAM_VALUE','GPS_RAW_INT']:
                 self.gui.onmavlinkpacket(m)
 
 
