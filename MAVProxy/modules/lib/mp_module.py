@@ -34,7 +34,11 @@ class MPModule(object):
                 # make the name distincitive, so self.module('map2') works
                 self.name += str(self.instance)
         if public:
-            mpstate.public_modules[self.name] = self
+            self.make_public()
+
+    def make_public(self):
+        '''mark a module public'''
+        self.mpstate.public_modules[self.name] = self
 
     #
     # Overridable hooks follow...
