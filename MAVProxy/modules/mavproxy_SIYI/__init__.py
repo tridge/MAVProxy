@@ -237,6 +237,7 @@ class SIYIModule(mp_module.MPModule):
                          ["<rates|connect|autofocus|zoom|yaw|pitch|center|getconfig|angle|photo|recording|lock|follow|fpv|settarget|notarget|thermal|rgbview|tempsnap|get_thermal_mode|thermal_gain|get_thermal_gain|settime>",
                           "<therm_getenv|therm_set_distance|therm_set_emissivity|therm_set_humidity|therm_set_airtemp|therm_set_reftemp|therm_getswitch|therm_setswitch>",
                           "<therm_getthresholds|therm_getthreshswitch|therm_setthresholds|therm_setthreshswitch>",
+                          "<autoflag_reload>",
                           "set (SIYISETTING)",
                           "imode <1|2|3|4|5|6|7|8|wide|zoom|split>",
                           "palette <WhiteHot|GloryHot>",
@@ -291,7 +292,7 @@ class SIYIModule(mp_module.MPModule):
                                                      ('autoflag_history', float, 50),
                                                      ('autoflag_slices', int, 4),
                                                      ('autoflag_radius', int, 100),
-                                                     ('autoflag_history', int, 5),
+                                                     ('autoflag_history', int, 20),
                                                      ('track_ROI', int, 1),
                                                      ('fetch_timeout', float, 2.0),
                                                      MPSetting('thresh_climit', int, 50, range=(10,50)),
@@ -1240,7 +1241,7 @@ class SIYIModule(mp_module.MPModule):
         fov_att = self.get_fov_attitude()
         att = self.master.messages.get('ATTITUDE',None)
         gpi = self.master.messages.get('GLOBAL_POSITION_INT',None)
-        GPS_RAW_INT = self.master.messages['GPS_RAW_INT']
+        GPS_RAW_INT = self.master.messages.get('GPS_RAW_INT',None)
         if gpi is None or att is None or GPS_RAW_INT is None:
             return None
         myalt = GPS_RAW_INT.alt*1.0e-3 + self.siyi_settings.mount_alt
@@ -1258,7 +1259,7 @@ class SIYIModule(mp_module.MPModule):
         fov_att = self.get_fov_attitude()
         att = self.master.messages.get('ATTITUDE',None)
         gpi = self.master.messages.get('GLOBAL_POSITION_INT',None)
-        GPS_RAW_INT = self.master.messages['GPS_RAW_INT']
+        GPS_RAW_INT = self.master.messages.get('GPS_RAW_INT',None)
         if gpi is None or att is None or GPS_RAW_INT is None:
             return None
         myalt = GPS_RAW_INT.alt*1.0e-3 + self.siyi_settings.mount_alt
@@ -1302,7 +1303,7 @@ class SIYIModule(mp_module.MPModule):
         self.last_target_send = now
 
         GLOBAL_POSITION_INT = self.master.messages['GLOBAL_POSITION_INT']
-        GPS_RAW_INT = self.master.messages['GPS_RAW_INT']
+        GPS_RAW_INT = self.master.messages.get('GPS_RAW_INT',None)
         ATTITUDE = self.master.messages['ATTITUDE']
         lat, lon, alt = self.target_pos
         mylat = GLOBAL_POSITION_INT.lat*1.0e-7
@@ -1368,7 +1369,7 @@ class SIYIModule(mp_module.MPModule):
         fov_att = self.get_fov_attitude()
         att = self.master.messages.get('ATTITUDE',None)
         gpi = self.master.messages.get('GLOBAL_POSITION_INT',None)
-        GPS_RAW_INT = self.master.messages['GPS_RAW_INT']
+        GPS_RAW_INT = self.master.messages.get('GPS_RAW_INT',None)
         if gpi is None or att is None or GPS_RAW_INT is None:
             return None
         myalt = GPS_RAW_INT.alt*1.0e-3 + self.siyi_settings.mount_alt
@@ -1505,6 +1506,7 @@ class SIYIModule(mp_module.MPModule):
     def autoflag_clear(self):
         '''clear auto flagged locations'''
         self.mpstate.map.add_object(mp_slipmap.SlipClearLayer('thermal_flag'))
+        self.thermal_flame_count = 0
 
     def autoflag_reload(self):
         '''reload auto flagged locations'''
