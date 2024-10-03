@@ -26,7 +26,7 @@ class DisplayItem:
 
 class ConsoleModule(mp_module.MPModule):
     def __init__(self, mpstate):
-        super(ConsoleModule, self).__init__(mpstate, "console", "GUI console", public=True, multi_vehicle=True)
+        super(ConsoleModule, self).__init__(mpstate, "console", "GUI console", public=False, multi_vehicle=True)
         self.in_air = False
         self.start_time = 0.0
         self.total_time = 0.0
@@ -96,6 +96,9 @@ class ConsoleModule(mp_module.MPModule):
                                                MPMenuItem('Show Checklist', 'Load Checklist', '# module load checklist')]))
             self.vehicle_menu = MPMenuSubMenu('Vehicle', items=[])
             self.add_menu(self.vehicle_menu)
+
+        # make public after init to prevent race conditions
+        self.make_public()
 
     def cmd_console(self, args):
         usage = 'usage: console <add|list|remove|menu|set>'
