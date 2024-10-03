@@ -668,12 +668,24 @@ class MPImagePanel(wx.Panel):
         
     def video_thread(self, url, cap_options):
         '''thread for video capture'''
+        print("URL=", url.strip())
         self.vcap = cv2.VideoCapture(url, cap_options)
-        if not self.vcap or not self.vcap.isOpened():
-            print("VideoCapture failed")
+        if not self.vcap:
+            print("VideoCapture failed1")
             return
+        if not self.vcap.isOpened():
+            print("VideoCapture failed2")
+            #return
+        #print("CAP_PROP_READ_TIMEOUT_MSEC: ",self.vcap.CAP_PROP_READ_TIMEOUT_MSEC)
 
         while True:
+            if self.vcap is None:
+                self.vcap = cv2.VideoCapture(url, cap_options)
+            if not self.vcap or not self.vcap.isOpened():
+                print("Reopen failed")
+                self.vcap = None
+                time.sleep(2)
+                continue
             if self.seek_percentage is not None:
                 frame_count = self.vcap.get(cv2.CAP_PROP_FRAME_COUNT)
                 if frame_count > 0:
@@ -686,10 +698,15 @@ class MPImagePanel(wx.Panel):
             try:
                 _, frame = self.vcap.read()
             except Exception as ex:
-                print(ex)
-                break
+                print("VIDEO: ", ex)
+                self.vcap.release()
+                self.vcap = None
+                continue
             if frame is None:
-                break
+                print("VIDEO: no frame")
+                self.vcap.release()
+                self.vcap = None
+                continue
             frame_count = int(self.vcap.get(cv2.CAP_PROP_POS_FRAMES))
             if frame_count % 5 == 0:
                 self.state.out_queue.put(MPImageFrameCounter(frame_count))
