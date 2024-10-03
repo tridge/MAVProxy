@@ -291,6 +291,7 @@ class SIYIModule(mp_module.MPModule):
                                                      ('autoflag_history', float, 50),
                                                      ('autoflag_slices', int, 4),
                                                      ('autoflag_radius', int, 100),
+                                                     ('autoflag_history', int, 5),
                                                      ('track_ROI', int, 1),
                                                      ('fetch_timeout', float, 2.0),
                                                      MPSetting('thresh_climit', int, 50, range=(10,50)),
@@ -364,6 +365,7 @@ class SIYIModule(mp_module.MPModule):
         self.last_therm_cap = time.time()
         self.thermal_capture_count = 0
         self.thermal_data_count = 0
+        self.thermal_flame_count = 0
         self.last_therm_mode = time.time()
         self.named_float_seq = 0
 
@@ -1476,9 +1478,18 @@ class SIYIModule(mp_module.MPModule):
                 #print("roi_dist: ", roi_dist, lat, lon, roi_lat, roi_lon)
                 return
 
+        self.thermal_flame_count = self.thermal_flame_count + 1
+        self.console.set_status('TFIR', 'TFIR %u' % self.thermal_flame_count, row=6)
+
         icon = self.mpstate.map.icon('flame.png')
+        #icon = self.mpstate.map.icon('blueblimp.png')
+
+        icon_name = 'icon [%u]' % self.thermal_flame_count
+        icon_name_history = 'icon [%u]' % (self.thermal_flame_count - self.siyi_settings.autoflag_history)
+
+        self.mpstate.map.add_object(mp_slipmap.SlipRemoveObject(icon_name_history))
         self.mpstate.map.add_object(mp_slipmap.SlipIcon(
-            'icon [%u]' % msec,
+            icon_name,
             (float(latlon[0]),float(latlon[1])),
             icon, layer='thermal_flag', rotation=0, follow=False))
 
