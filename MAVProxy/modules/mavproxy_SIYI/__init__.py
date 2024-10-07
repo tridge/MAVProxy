@@ -1093,12 +1093,12 @@ class SIYIModule(mp_module.MPModule):
         elif cmd == GET_THERMAL_MODE:
             ok, = self.unpack(cmd,"<B", data)
             if self.siyi_settings.therm_cap_rate > 0 and ok != 1:
-                print("ThermalMode: %u" % ok)
+                #print("ThermalMode: %u" % ok)
                 self.send_packet_fmt(SET_THERMAL_MODE, "<B", 1)
 
         elif cmd == SET_THERMAL_MODE:
             ok, = self.unpack(cmd,"<B", data)
-            print("SetThermalMode: %u" % ok)
+            #print("SetThermalMode: %u" % ok)
 
         elif cmd == SET_THERMAL_GAIN:
             ok, = self.unpack(cmd,"<B", data)
@@ -1462,7 +1462,10 @@ class SIYIModule(mp_module.MPModule):
         FOV = self.siyi_settings.thermal_fov
         C = camera_projection.CameraParams(xresolution=thermal_width, yresolution=thermal_height, FOV=FOV)
         cproj = camera_projection.CameraProjection(C, elevation_model=self.module('terrain').ElevationModel)
-        slant_range = cproj.get_slantrange(lat,lon,gps_alt+self.siyi_settings.mount_alt,siyi_roll,siyi_pitch-self.siyi_settings.mount_pitch,siyi_yaw+yaw-self.siyi_settings.mount_yaw)
+        slant_range = cproj.get_slantrange(lat,lon,gps_alt+self.siyi_settings.mount_alt,
+                                           siyi_roll,
+                                           siyi_pitch-self.siyi_settings.mount_pitch,
+                                           siyi_yaw+yaw-self.siyi_settings.mount_yaw)
         if slant_range is None:
             return
         x = (tmax_x/thermal_width) * 2 - 1.0
