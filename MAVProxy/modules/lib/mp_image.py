@@ -221,6 +221,7 @@ class MPImage():
         self.menu = None
         self.popup_menu = None
         self.fps = fps
+        self.inverted = False
 
         self.in_queue = multiproc.Queue()
         self.out_queue = multiproc.Queue()
@@ -427,6 +428,8 @@ class MPImagePanel(wx.Panel):
         self.seek_percentage = None
         self.seek_frame = None
         self.osd_elements = None
+        self.inverted = False
+
         state.brightness = 1.0
 
         # dragpos is the top left position in image coordinates

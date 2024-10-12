@@ -169,6 +169,14 @@ class RawThermal:
 
         # convert to 0 to 255
         a = (a - minv) * 255 / (maxv - minv)
+        a = a.reshape(512, 640)
+
+        maxpt = np.unravel_index(a.argmax(), a.shape)
+
+        if self.siyi.siyi_settings.thermal_gamma:
+            a = a / 255.0
+            a = np.power(a, 1.0 / self.siyi.siyi_settings.thermal_gamma)
+            a = np.uint8(a * 255)
 
         # convert to uint8 greyscale as 640x512 image
         a = a.astype(np.uint8)
@@ -177,6 +185,13 @@ class RawThermal:
         a = cv2.cvtColor(a, cv2.COLOR_GRAY2RGB)
         if self.im is None:
             return
+
+        if self.siyi.siyi_settings.thermal_square > 0:
+            half_side = self.siyi.siyi_settings.thermal_square // 2
+            top_left = (maxpt[1] - half_side, maxpt[0] - half_side)
+            bottom_right = (maxpt[1] + half_side, maxpt[0] + half_side)
+            cv2.rectangle(a, top_left, bottom_right, (255,255,0), 2)
+
         self.im.set_image(a)
         self.image_count += 1
         self.update_title()

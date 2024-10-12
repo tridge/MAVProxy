@@ -274,6 +274,9 @@ class SIYIModule(mp_module.MPModule):
                                                      ('fps_rgb', int, 20),
                                                      ('logfile', str, 'SIYI_log.bin'),
                                                      ('thermal_fov', float, 24.2),
+                                                     ('thermal_gamma', float, 0.0),
+                                                     ('thermal_square', int, 50),
+
                                                      ('zoom_fov', float, 62.0),
                                                      ('wide_fov', float, 88.0),
                                                      ('use_lidar', int, 0),
