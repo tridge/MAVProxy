@@ -96,6 +96,9 @@ class CameraView:
         popup.add_to_submenu(["Marker"], MPMenuItem("Flag", returnkey="Marker:flag"))
         popup.add_to_submenu(["Marker"], MPMenuItem("Barrell", returnkey="Marker:barrell"))
 
+        popup.add_to_submenu(["Invert"], MPMenuItem("Normal", returnkey="Invert:normal"))
+        popup.add_to_submenu(["Invert"], MPMenuItem("Inverted", returnkey="Invert:inverted"))
+
         gst_pipeline = "rtspsrc location={0} latency=0 protocols=tcp tcp-timeout=3000000 buffer-mode=auto ! rtph265depay !  tee name=tee1 tee1. ! queue ! h265parse ! avdec_h265  ! videoconvert ! video/x-raw,format=BGRx ! appsink tee1. ! queue ! h265parse config-interval=15 ! video/x-h265 ! mpegtsmux ! filesink location={1}".format(
             self.rtsp_url, self.filename
         )
@@ -219,6 +222,10 @@ class CameraView:
                     print("ViewMode: %s" % self.siyi.click_mode)
                 elif event.returnkey.startswith("Marker:"):
                     self.siyi.handle_marker(event.returnkey[7:])
+                elif event.returnkey.startswith("Invert:normal"):
+                    self.im.set_inverted(False)
+                elif event.returnkey.startswith("Invert:inverted"):
+                    self.im.set_inverted(True)
                 elif event.returnkey.startswith("Lens:") and self.siyi is not None:
                     self.siyi.cmd_imode([event.returnkey[5:]])
                 elif event.returnkey.startswith("Zoom:") and self.siyi is not None:

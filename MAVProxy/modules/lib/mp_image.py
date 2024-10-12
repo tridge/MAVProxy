@@ -102,6 +102,11 @@ class MPImageColormap:
     def __init__(self, colormap):
         self.colormap = colormap
 
+class MPImageInverted:
+    '''set inversion'''
+    def __init__(self, inverted):
+        self.inverted = inverted
+        
 class MPImageColormapIndex:
     '''set a colormap index for display'''
     def __init__(self, colormap_index):
@@ -331,6 +336,10 @@ class MPImage():
     def set_colormap_index(self, colormap_index):
         '''set a colormap index for greyscale data'''
         self.in_queue.put(MPImageColormapIndex(colormap_index))
+
+    def set_inverted(self, inverted):
+        '''set inverted flag'''
+        self.in_queue.put(MPImageInverted(inverted))
         
     def start_tracker(self, x, y, width, height):
         '''start a tracker'''
@@ -532,6 +541,10 @@ class MPImagePanel(wx.Panel):
             warnings.simplefilter('ignore')
             img = wx.EmptyImage(width, height)
 
+        if self.inverted:
+            #data = cv2.flip(data, 0)
+            data = cv2.rotate(data, cv2.ROTATE_180)
+
         self.raw_img = data
 
         if self.colormap is not None:
@@ -621,6 +634,8 @@ class MPImagePanel(wx.Panel):
                 self.colormap = obj.colormap
             if isinstance(obj, MPImageColormapIndex):
                 self.colormap_index = obj.colormap_index
+            if isinstance(obj, MPImageInverted):
+                self.inverted = obj.inverted
             if isinstance(obj, MPImageStartTracker):
                 self.start_tracker(obj)
             if isinstance(obj, MPImageEndTracker):
