@@ -70,6 +70,7 @@ class RelayModule(mp_module.MPModule):
             count = int(args[4])
         else:
             count = 0
+        print("Sending motor test at ", time.time())
         self.master.mav.command_long_send(self.target_system,
                                           0,
                                           mavutil.mavlink.MAV_CMD_DO_MOTOR_TEST, 0,

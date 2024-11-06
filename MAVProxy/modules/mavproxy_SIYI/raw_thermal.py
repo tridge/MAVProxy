@@ -97,6 +97,8 @@ class RawThermal:
     def in_history(self, latlon):
         '''check if latlon in the history'''
         autoflag_dist = self.siyi.siyi_settings.autoflag_dist
+        if autoflag_dist <= 0:
+            return False
         for (lat1,lon1) in self.marker_history:
             dist = mp_util.gps_distance(lat1,lon1,latlon[0],latlon[1])
             if dist < autoflag_dist:

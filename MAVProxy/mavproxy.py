@@ -266,7 +266,8 @@ class MPState(object):
               MPSetting('wpalt', int, 100, 'Default WP Altitude', range=(0,10000), increment=1),
               MPSetting('rallyalt', int, 90, 'Default Rally Altitude', range=(0,10000), increment=1),
               MPSetting('terrainalt', str, 'Auto', 'Use terrain altitudes', choice=['Auto','True','False']),
-              MPSetting('guidedalt', int, 100, 'Default "Fly To" Altitude', range=(0,10000), increment=1),
+
+            MPSetting('guidedalt', int, 100, 'Default "Fly To" Altitude', range=(0,10000), increment=1),
               MPSetting('guided_use_reposition', bool, True, 'Use MAV_CMD_DO_REPOSITION for guided fly-to'),
               MPSetting('rally_breakalt', int, 40, 'Default Rally Break Altitude', range=(0,10000), increment=1),
               MPSetting('rally_flags', int, 0, 'Default Rally Flags', range=(0,10000), increment=1),
@@ -755,18 +756,6 @@ def process_stdin(line):
     except Exception as e:
         print("Caught shlex exception: %s" % str(e));
         return
-
-    # strip surrounding quotes - shlex leaves them in place
-    new_args = []
-    for arg in args:
-        done = False
-        new_arg = arg
-        for q in "'", '"':
-            if arg.startswith(q) and arg.endswith(q):
-                new_arg = arg[1:-1]
-                break
-        new_args.append(new_arg)
-    args = new_args
 
     cmd = args[0]
     while cmd in mpstate.aliases:
